@@ -1,0 +1,43 @@
+{
+    "name": "daycry/class-finder",
+    "description": "Namespace Class Finder",
+    "homepage": "https://github.com/daycry/class-finder",
+    "authors":
+    [
+        {
+            "name": "daycry",
+            "homepage": "https://github.com/daycry",
+            "role": "Developer"
+        }
+    ],
+    "license": "MIT",
+    "require": {
+      "php": ">=7.2 || ^8.0"
+    },
+    "require-dev":
+    {
+        "phpunit/phpunit" : "8.5.*",
+        "codeigniter4/framework": "^4.0.2",
+        "friendsofphp/php-cs-fixer": "^3.1"
+    },
+    "autoload":
+    {
+        "psr-4": {
+            "Daycry\\ClassFinder\\": "src/"
+        },
+        "exclude-from-classmap": [
+            "**/Database/Migrations/**"
+        ]
+    },
+    "autoload-dev":
+    {
+        "psr-4":
+        {
+            "Daycry\\ClassFinder\\": "tests/ClassFinder/"
+        }
+    },
+    "scripts": {
+        "test": "phpunit",
+        "cs-fixer": "vendor/bin/php-cs-fixer fix src"
+    }
+}
