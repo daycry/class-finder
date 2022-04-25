@@ -4,20 +4,15 @@ namespace Daycry\ClassFinder\Libraries\PSR4;
 
 use Daycry\ClassFinder\Exceptions\ClassFinderException;
 use Config\Services;
-class PSR4NamespaceFactory
+
+class PSR4Factory extends \Daycry\ClassFinder\Libraries\BaseFactory
 {
     /**
      * @return string[]
      */
     public function getPSR4Namespaces()
     {
-
-        $loader  = Services::autoloader();
-
-        /*$namespaces = $this->getUserDefinedPSR4Namespaces();
-        $vendorNamespaces = require(ROOTPATH . 'vendor/composer/autoload_psr4.php');*/
-
-        $namespaces = $loader->getNamespace();
+        $namespaces = $this->getPSR4();
 
         $names = array_keys($namespaces);
         $directories = array_values($namespaces);
@@ -28,23 +23,6 @@ class PSR4NamespaceFactory
 
         return $namespaces;
     }
-
-    /**
-     * @return string[]
-     */
-    /*private function getUserDefinedPSR4Namespaces()
-    {
-        $composerJsonPath = ROOTPATH . 'composer.json';
-        $composerConfig = json_decode(file_get_contents($composerJsonPath));
-
-        if (!isset($composerConfig->autoload)) {
-            return array();
-        }
-
-        //Apparently PHP doesn't like hyphens, so we use variable variables instead.
-        $psr4 = "psr-4";
-        return (array)$composerConfig->autoload->$psr4;
-    }*/
 
     /**
      * Creates a namespace from composer_psr4.php and composer.json autoload.psr4 items.
@@ -81,6 +59,7 @@ class PSR4NamespaceFactory
         $psr4Namespace = new PSR4Namespace($namespace, $directories);
 
         $subNamespaces = $this->getSubnamespaces($psr4Namespace);
+
         $psr4Namespace->setDirectSubnamespaces($subNamespaces);
 
         return $psr4Namespace;
@@ -98,9 +77,11 @@ class PSR4NamespaceFactory
         $self = $this;
         $subnamespaces = array_map(function($directory) use ($self, $psr4Namespace){
             $segments = explode('/', $directory);
+
             $subnamespaceSegment = array_pop($segments);
 
             $namespace = $psr4Namespace->getNamespace() . "\\" . $subnamespaceSegment . "\\";
+
             return $self->createNamespace($namespace, $directory);
         }, $directories);
 

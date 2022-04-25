@@ -11,7 +11,7 @@ interface FinderInterface
      * @param int $options
      * @return string[]
      */
-    public function findClasses($namespace, $options);
+    public function findClasses(string $namespace, int $options);
 
     /**
      * Check if a given namespace is known.
@@ -25,5 +25,5 @@ interface FinderInterface
      * @param string $namespace
      * @return bool
      */
-    public function isNamespaceKnown($namespace);
+    public function isNamespaceKnown(string $namespace);
 }

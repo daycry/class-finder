@@ -170,9 +170,12 @@ class PSR4Namespace
         $relativePath = substr($namespace, strlen($this->namespace));
 
         $self = $this;
+
         $directories = array_reduce($this->directories, function($carry, $directory) use ($relativePath, $namespace, $self){
+
             $path = $self->normalizePath($directory, $relativePath);
             $realDirectory = realpath($path);
+
             if ($realDirectory !== false) {
                 return array_merge($carry, array($realDirectory));
             } else {
@@ -196,13 +199,16 @@ class PSR4Namespace
             return $this->getClassesFromListRecursively($namespace);
         } else {
             return array_filter($potentialClasses, function($potentialClass) {
-                if (function_exists($potentialClass)) {
-                    // For some reason calling class_exists() on a namespace'd function raises a Fatal Error (tested PHP 7.0.8)
-                    // Example: DeepCopy\deep_copy
-                    return false;
-                } else {
-                    return class_exists($potentialClass);
+                if( strpos( $potentialClass, 'Views') === false) {
+                    if (function_exists($potentialClass)) {
+                        // For some reason calling class_exists() on a namespace'd function raises a Fatal Error (tested PHP 7.0.8)
+                        // Example: DeepCopy\deep_copy
+                        return false;
+                    } else {
+                        return class_exists($potentialClass);
+                    }
                 }
+                return false;
             });
         }
     }
@@ -237,13 +243,17 @@ class PSR4Namespace
         }, $potentialClassFiles);
 
         return array_filter($potentialClasses, function($potentialClass) {
-            if (function_exists($potentialClass)) {
-                // For some reason calling class_exists() on a namespace'd function raises a Fatal Error (tested PHP 7.0.8)
-                // Example: DeepCopy\deep_copy
-                return false;
-            } else {
-                return class_exists($potentialClass);
+            if( strpos( $potentialClass, 'Views') === false) {
+                if (function_exists($potentialClass)) {
+                    // For some reason calling class_exists() on a namespace'd function raises a Fatal Error (tested PHP 7.0.8)
+                    // Example: DeepCopy\deep_copy
+                    return false;
+                } else {
+                    return class_exists($potentialClass);
+                }
             }
+
+            return false;
         });
     }
 
@@ -255,11 +265,9 @@ class PSR4Namespace
      */
     public function getClassesFromListRecursively($namespace)
     {
-        if( strpos( 'Views', $namespace) !== false) {
+        if( strpos( $this->namespace, 'Views') === false) {
             $initialClasses = strpos( $this->namespace, $namespace) !== false ? $this->getDirectClassesOnly() : array();
-
             $result = array_reduce($this->getDirectSubnamespaces(), function($carry, PSR4Namespace $subNamespace) use ($namespace) {
-
                 return array_merge($carry, $subNamespace->getClassesFromListRecursively($namespace));
             }, $initialClasses);
         }else{
@@ -281,6 +289,7 @@ class PSR4Namespace
     public function normalizePath($directory, $relativePath)
     {
         $path = str_replace('\\', '/', $directory . '/' . $relativePath);
+
         return $path;
     }
 

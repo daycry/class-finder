@@ -2,32 +2,25 @@
 
 namespace Daycry\ClassFinder\Libraries\PSR4;
 
-use Daycry\ClassFinder\ClassFinder;
 use Daycry\ClassFinder\Interfaces\FinderInterface;
 
 class PSR4Finder implements FinderInterface
 {
-    /** @var PSR4NamespaceFactory */
-    private $factory;
+    private PSR4Factory $factory;
 
-    public function __construct(PSR4NamespaceFactory $factory)
+    public function __construct()
     {
-        $this->factory = $factory;
+        $this->factory = new PSR4Factory();
     }
 
-    /**
-     * @param string $namespace
-     * @param int $options
-     * @return string[]
-     */
-    public function findClasses($namespace, $options)
+    public function findClasses(string $namespace, int $options)
     {
-        if ($options === ClassFinder::RECURSIVE_MODE) {
-            $applicableNamespaces = $this->findAllApplicableNamespaces($namespace);
+        if ($options === \Daycry\ClassFinder\ClassFinder::RECURSIVE_MODE) {
+            $applicableNamespaces = $this->_findAllApplicableNamespaces($namespace);
         }
-
+        
         if (empty($applicableNamespaces)) {
-            $bestNamespace = $this->findBestPSR4Namespace($namespace);
+            $bestNamespace = $this->_findBestPSR4Namespace($namespace);
             $applicableNamespaces = array($bestNamespace);
         }
 
@@ -40,14 +33,9 @@ class PSR4Finder implements FinderInterface
 
             return array_merge($carry, $classes);
         }, array());
-
     }
 
-    /**
-     * @param string $namespace
-     * @return bool
-     */
-    public function isNamespaceKnown($namespace)
+    public function isNamespaceKnown(string $namespace)
     {
         $composerNamespaces = $this->factory->getPSR4Namespaces();
 
@@ -64,7 +52,7 @@ class PSR4Finder implements FinderInterface
      * @param string $namespace
      * @return PSR4Namespace[]
      */
-    private function findAllApplicableNamespaces($namespace)
+    private function _findAllApplicableNamespaces($namespace)
     {
         $composerNamespaces = $this->factory->getPSR4Namespaces();
 
@@ -77,7 +65,7 @@ class PSR4Finder implements FinderInterface
      * @param string $namespace
      * @return PSR4Namespace
      */
-    private function findBestPSR4Namespace($namespace)
+    private function _findBestPSR4Namespace($namespace)
     {
         $composerNamespaces = $this->factory->getPSR4Namespaces();
 
