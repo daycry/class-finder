@@ -3,7 +3,7 @@
 namespace Daycry\ClassFinder\Libraries\PSR4;
 
 use Daycry\ClassFinder\Exceptions\ClassFinderException;
-
+use Config\Services;
 class PSR4NamespaceFactory
 {
     /**
@@ -11,12 +11,14 @@ class PSR4NamespaceFactory
      */
     public function getPSR4Namespaces()
     {
-        $namespaces = $this->getUserDefinedPSR4Namespaces();
-        $vendorNamespaces = require(ROOTPATH . 'vendor/composer/autoload_psr4.php');
 
-        $namespaces = array_merge($vendorNamespaces, $namespaces);
+        $loader  = Services::autoloader();
 
-        // There's some wackiness going on here for PHP 5.3 compatibility.
+        /*$namespaces = $this->getUserDefinedPSR4Namespaces();
+        $vendorNamespaces = require(ROOTPATH . 'vendor/composer/autoload_psr4.php');*/
+
+        $namespaces = $loader->getNamespace();
+
         $names = array_keys($namespaces);
         $directories = array_values($namespaces);
         $self = $this;
