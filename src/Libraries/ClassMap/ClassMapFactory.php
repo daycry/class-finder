@@ -1,26 +1,28 @@
 <?php
 
-namespace Daycry\ClassFinder\Libraries\PSR4;
+namespace Daycry\ClassFinder\Libraries\ClassMap;
 
 use Daycry\ClassFinder\Exceptions\ClassFinderException;
 
-class PSR4Factory extends \Daycry\ClassFinder\Libraries\BaseFactory
+class ClassMapFactory extends \Daycry\ClassFinder\Libraries\BaseFactory
 {
     /**
      * @return string[]
      */
-    public function getPSR4Namespaces()
+    public function getClassMapEntries()
     {
-        $namespaces = $this->getPSR4();
+        $classmap = $this->getClassMap();
 
-        $names = array_keys($namespaces);
-        $directories = array_values($namespaces);
-        $self = $this;
-        $namespaces = array_map(function($index) use ($self, $names, $directories) {
-            return $self->createNamespace($names[$index], $directories[$index]);
-        },range(0, count($namespaces) - 1));
+        // if classmap has no entries return empty array
+        if(count($classmap) == 0) {
+            return array();
+        }
 
-        return $namespaces;
+        $classmapKeys = array_keys($classmap);
+
+        return array_map(function($index) use ($classmapKeys){
+            return new ClassMapEntry($classmapKeys[$index]);
+        }, range(0, count($classmap) - 1));
     }
 
     /**
