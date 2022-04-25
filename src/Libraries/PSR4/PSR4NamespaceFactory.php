@@ -32,7 +32,7 @@ class PSR4NamespaceFactory
     /**
      * @return string[]
      */
-    private function getUserDefinedPSR4Namespaces()
+    /*private function getUserDefinedPSR4Namespaces()
     {
         $composerJsonPath = ROOTPATH . 'composer.json';
         $composerConfig = json_decode(file_get_contents($composerJsonPath));
@@ -44,7 +44,7 @@ class PSR4NamespaceFactory
         //Apparently PHP doesn't like hyphens, so we use variable variables instead.
         $psr4 = "psr-4";
         return (array)$composerConfig->autoload->$psr4;
-    }
+    }*/
 
     /**
      * Creates a namespace from composer_psr4.php and composer.json autoload.psr4 items.
