@@ -29,9 +29,7 @@ Examples
 ```
 <?php
 
-require_once __DIR__ . '/vendor/autoload.php';
-
-$classes = \Daycry\ClassFinder\ClassFinder::getClassesInNamespace('TestApp1\Foo');
+$classes = (new \Daycry\ClassFinder\ClassFinder)->getClassesInNamespace('Daycry');
 
 /**
  * array(
@@ -48,9 +46,7 @@ var_dump($classes);
 ```
 <?php
 
-require_once __DIR__ . '/vendor/autoload.php';
-
-$classes = \Daycry\ClassFinder\ClassFinder::getClassesInNamespace('TestApp1\Foo', \Daycry\ClassFinder\ClassFinder::RECURSIVE_MODE);
+$classes = (new \Daycry\ClassFinder\ClassFinder)->getClassesInNamespace('Daycry', \Daycry\ClassFinder\ClassFinder::RECURSIVE_MODE);
 
 /**
  * array(
