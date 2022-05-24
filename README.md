@@ -26,7 +26,7 @@ Examples
 
 **Standard Mode**
 
-```
+```php
 <?php
 
 $classes = (new \Daycry\ClassFinder\ClassFinder)->getClassesInNamespace('Daycry');
@@ -43,7 +43,7 @@ var_dump($classes);
 
 **Recursive Mode**
 
-```
+```php
 <?php
 
 $classes = (new \Daycry\ClassFinder\ClassFinder)->getClassesInNamespace('Daycry', \Daycry\ClassFinder\ClassFinder::RECURSIVE_MODE);
