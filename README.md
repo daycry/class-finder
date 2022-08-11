@@ -36,7 +36,7 @@ Examples
 ```php
 <?php
 
-$classes = (new \Daycry\ClassFinder\ClassFinder)->getClassesInNamespace('Daycry');
+$classes = (new \Daycry\ClassFinder\ClassFinder())->getClassesInNamespace('Daycry');
 
 /**
  * array(
@@ -53,7 +53,7 @@ var_dump($classes);
 ```php
 <?php
 
-$classes = (new \Daycry\ClassFinder\ClassFinder)->getClassesInNamespace('Daycry', \Daycry\ClassFinder\ClassFinder::RECURSIVE_MODE);
+$classes = (new \Daycry\ClassFinder\ClassFinder())->getClassesInNamespace('Daycry', \Daycry\ClassFinder\ClassFinder::RECURSIVE_MODE);
 
 /**
  * array(
@@ -69,4 +69,21 @@ $classes = (new \Daycry\ClassFinder\ClassFinder)->getClassesInNamespace('Daycry'
  * )
  */
 var_dump($classes);
+```
+
+
+If you want to modify the configuration, you can modify the file Config/ClassFinder.php
+
+or
+
+Edit the configuration and pass it to the constructor
+
+```php
+<?php
+$config = config('ClassFinder');
+
+$config->finder['classMap'] = false;
+$config->finder['files'] = false;
+
+$classes = (new \Daycry\ClassFinder\ClassFinder($config))->getClassesInNamespace('Daycry', \Daycry\ClassFinder\ClassFinder::RECURSIVE_MODE);
 ```
