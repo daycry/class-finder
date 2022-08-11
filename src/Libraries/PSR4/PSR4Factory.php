@@ -34,21 +34,23 @@ class PSR4Factory extends \Daycry\ClassFinder\Libraries\BaseFactory
     public function createNamespace($namespace, $directories)
     {
         if (is_string($directories)) {
-            // This is an acceptable format according to composer.json
             $directories = array($directories);
         } elseif (is_array($directories)) {
-            // composer_psr4.php seems to put everything in this format
+        // @codeCoverageIgnoreStart
         } else {
             throw new ClassFinderException('Unknown PSR4 definition.');
         }
+        // @codeCoverageIgnoreEnd
 
         $self = $this;
         $directories = array_map(function($directory) use ($self) {
             if ($self->isAbsolutePath($directory)) {
                 return $directory;
+            // @codeCoverageIgnoreStart
             } else {
                 return ROOTPATH . $directory;
             }
+            // @codeCoverageIgnoreEnd
         }, $directories);
 
         $directories = array_filter(array_map(function($directory) {
@@ -57,7 +59,7 @@ class PSR4Factory extends \Daycry\ClassFinder\Libraries\BaseFactory
 
         $psr4Namespace = new PSR4Namespace($namespace, $directories);
 
-        $subNamespaces = $this->getSubnamespaces($psr4Namespace);
+        $subNamespaces = $this->getSubNamespaces($psr4Namespace);
 
         $psr4Namespace->setDirectSubnamespaces($subNamespaces);
 
@@ -68,7 +70,7 @@ class PSR4Factory extends \Daycry\ClassFinder\Libraries\BaseFactory
      * @param PSR4Namespace $psr4Namespace
      * @return PSR4Namespace[]
      */
-    private function getSubnamespaces(PSR4Namespace $psr4Namespace)
+    private function getSubNamespaces(PSR4Namespace $psr4Namespace)
     {
         // Scan it's own directories.
         $directories = $psr4Namespace->findDirectories();
@@ -99,10 +101,12 @@ class PSR4Factory extends \Daycry\ClassFinder\Libraries\BaseFactory
      * @throws ClassFinderException
      */
     public function isAbsolutePath($path) {
+        // @codeCoverageIgnoreStart
         if (!is_string($path)) {
             $mess = sprintf('String expected but was given %s', gettype($path));
             throw new ClassFinderException($mess);
         }
+        // @codeCoverageIgnoreEnd
 
         // Optional wrapper(s).
         $regExp = '%^(?<wrappers>(?:[[:print:]]{2,}://)*)';
@@ -112,12 +116,16 @@ class PSR4Factory extends \Daycry\ClassFinder\Libraries\BaseFactory
         $regExp .= '(?<path>(?:[[:print:]]*))$%';
         $parts = array();
         if (!preg_match($regExp, $path, $parts)) {
+            // @codeCoverageIgnoreStart
             $mess = sprintf('Path is NOT valid, was given %s', $path);
             throw new ClassFinderException($mess);
+            // @codeCoverageIgnoreEnd
         }
         if ('' !== $parts['root']) {
             return true;
         }
+        // @codeCoverageIgnoreStart
         return false;
+        // @codeCoverageIgnoreEnd
     }
 }

@@ -3,6 +3,7 @@
 namespace Daycry\ClassFinder\Libraries\ClassMap;
 
 use Daycry\ClassFinder\Exceptions\ClassFinderException;
+use Daycry\ClassFinder\Libraries\PSR4\PSR4Namespace;
 
 class ClassMapFactory extends \Daycry\ClassFinder\Libraries\BaseFactory
 {
@@ -15,7 +16,9 @@ class ClassMapFactory extends \Daycry\ClassFinder\Libraries\BaseFactory
 
         // if classmap has no entries return empty array
         if(count($classmap) == 0) {
+            // @codeCoverageIgnoreStart
             return array();
+            // @codeCoverageIgnoreEnd
         }
 
         $classmapKeys = array_keys($classmap);
@@ -23,103 +26,5 @@ class ClassMapFactory extends \Daycry\ClassFinder\Libraries\BaseFactory
         return array_map(function($index) use ($classmapKeys){
             return new ClassMapEntry($classmapKeys[$index]);
         }, range(0, count($classmap) - 1));
-    }
-
-    /**
-     * Creates a namespace from composer_psr4.php and composer.json autoload.psr4 items.
-     *
-     * @param string $namespace
-     * @param string[] $directories
-     * @return PSR4Namespace
-     * @throws ClassFinderException
-     */
-    public function createNamespace($namespace, $directories)
-    {
-        if (is_string($directories)) {
-            // This is an acceptable format according to composer.json
-            $directories = array($directories);
-        } elseif (is_array($directories)) {
-            // composer_psr4.php seems to put everything in this format
-        } else {
-            throw new ClassFinderException('Unknown PSR4 definition.');
-        }
-
-        $self = $this;
-        $directories = array_map(function($directory) use ($self) {
-            if ($self->isAbsolutePath($directory)) {
-                return $directory;
-            } else {
-                return ROOTPATH . $directory;
-            }
-        }, $directories);
-
-        $directories = array_filter(array_map(function($directory) {
-            return realpath($directory);
-        }, $directories));
-
-        $psr4Namespace = new PSR4Namespace($namespace, $directories);
-
-        $subNamespaces = $this->getSubnamespaces($psr4Namespace);
-
-        $psr4Namespace->setDirectSubnamespaces($subNamespaces);
-
-        return $psr4Namespace;
-    }
-
-    /**
-     * @param PSR4Namespace $psr4Namespace
-     * @return PSR4Namespace[]
-     */
-    private function getSubnamespaces(PSR4Namespace $psr4Namespace)
-    {
-        // Scan it's own directories.
-        $directories = $psr4Namespace->findDirectories();
-
-        $self = $this;
-        $subnamespaces = array_map(function($directory) use ($self, $psr4Namespace){
-            $segments = explode('/', $directory);
-
-            $subnamespaceSegment = array_pop($segments);
-
-            $namespace = $psr4Namespace->getNamespace() . "\\" . $subnamespaceSegment . "\\";
-
-            return $self->createNamespace($namespace, $directory);
-        }, $directories);
-
-        return $subnamespaces;
-    }
-
-    /**
-     * Check if a path is absolute.
-     *
-     * Mostly this answer https://stackoverflow.com/a/38022806/3000068
-     * A few changes: Changed exceptions to be ClassFinderExceptions, removed some ctype dependencies,
-     * updated the root prefix regex to handle Window paths better.
-     *
-     * @param string $path
-     * @return bool
-     * @throws ClassFinderException
-     */
-    public function isAbsolutePath($path) {
-        if (!is_string($path)) {
-            $mess = sprintf('String expected but was given %s', gettype($path));
-            throw new ClassFinderException($mess);
-        }
-
-        // Optional wrapper(s).
-        $regExp = '%^(?<wrappers>(?:[[:print:]]{2,}://)*)';
-        // Optional root prefix.
-        $regExp .= '(?<root>(?:[[:alpha:]]:[/\\\\]|/)?)';
-        // Actual path.
-        $regExp .= '(?<path>(?:[[:print:]]*))$%';
-        $parts = array();
-        if (!preg_match($regExp, $path, $parts)) {
-            $mess = sprintf('Path is NOT valid, was given %s', $path);
-            throw new ClassFinderException($mess);
-        }
-        if ('' !== $parts['root']) {
-            return true;
-        }
-        return false;
     }
 }

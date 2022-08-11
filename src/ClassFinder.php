@@ -3,30 +3,39 @@
 namespace Daycry\ClassFinder;
 
 use Daycry\ClassFinder\Interfaces\FinderInterface;
+use CodeIgniter\Config\BaseConfig;
 
 class ClassFinder
 {
     const STANDARD_MODE = 1;
     const RECURSIVE_MODE = 2;
+    
+    const ALLOW_CLASSES = 4;
+    const ALLOW_INTERFACES = 8;
+    const ALLOW_TRAITS = 16;
+    const ALLOW_FUNCTIONS = 32;
+
+    const ALLOW_ALL = 60;
 
     private array $_finders = [];
 
-    public function __construct()
+    public function __construct(BaseConfig $config = null)
     {
-        $this->initialize();
+        $this->initialize($config);
     }
     /**
      * @return void
      */
-    private function initialize()
+    private function initialize(BaseConfig $config = null)
     {
+        if( $config === null ) {
+            $config = config('ClassFinder');
+        }
         
-        $config = config('ClassFinder');
         foreach( $config->finder as $method => $value )
         {
             if( $value === true && isset( $config->finderClass[$method] ) )
             {
-                //d($config->finderClass[$method]);
                 $class = new $config->finderClass[$method]();
                 if( $class instanceof \Daycry\ClassFinder\Interfaces\FinderInterface )
                 {
@@ -34,21 +43,6 @@ class ClassFinder
                 }
             }
         }
-
-        /*if (!(self::$psr4 instanceof PSR4Finder)) {
-            $PSR4Factory = new PSR4NamespaceFactory();
-            self::$psr4 = new PSR4Finder($PSR4Factory);
-        }
-
-        if (!(self::$classmap instanceof ClassmapFinder)) {
-            $classmapFactory = new ClassmapEntryFactory();
-            self::$classmap = new ClassmapFinder($classmapFactory);
-        }
-
-        if (!(self::$files instanceof FilesFinder) && self::$useFilesSupport) {
-            $filesFactory = new FilesEntryFactory(self::$config);
-            self::$files = new FilesFinder($filesFactory);
-        }*/
     }
 
     /**

@@ -41,6 +41,8 @@ class ClassMapFinder implements FinderInterface
             }
         }
 
+        // @codeCoverageIgnoreStart
         return false;
+        // @codeCoverageIgnoreEnd
     }
 }

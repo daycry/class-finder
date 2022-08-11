@@ -67,11 +67,12 @@ class ClassMapEntry
     private function doesMatchDirectNamespace($namespace)
     {
         $classNameFragments = explode('\\', $this->getClassName());
+
         array_pop($classNameFragments);
         $classNamespace = implode('\\', $classNameFragments);
 
         $namespace = trim($namespace, '\\');
-
+        
         return $namespace === $classNamespace;
     }
 }

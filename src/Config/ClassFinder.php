@@ -8,11 +8,13 @@ class ClassFinder extends BaseConfig
 {
     public array $finder = [
         'PSR4' => true,
-        'classMap' => true
+        'classMap' => true,
+        'files' => true
     ];
 
     public array $finderClass = [
         'PSR4' => \Daycry\ClassFinder\Libraries\PSR4\PSR4Finder::class,
-        'classMap' => \Daycry\ClassFinder\Libraries\ClassMap\ClassMapFinder::class
+        'classMap' => \Daycry\ClassFinder\Libraries\ClassMap\ClassMapFinder::class,
+        'files' => \Daycry\ClassFinder\Libraries\Files\FilesFinder::class
     ];
 }
