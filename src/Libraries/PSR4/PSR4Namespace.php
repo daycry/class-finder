@@ -80,10 +80,10 @@ class PSR4Namespace
         $namespaceFragments = explode('\\', $namespace);
         $undefinedNamespaceFragments = array();
 
-        while($namespaceFragments) {
+        while ($namespaceFragments) {
             $possibleNamespace = implode('\\', $namespaceFragments) . '\\';
 
-            if(strpos($this->namespace, $possibleNamespace) !== false){
+            if (strpos($this->namespace, $possibleNamespace) !== false) {
                 return count(explode('\\', $possibleNamespace)) - 1;
             }
 
@@ -124,7 +124,7 @@ class PSR4Namespace
     public function findDirectories()
     {
         $self = $this;
-        $directories = array_reduce($this->directories, function($carry, $directory) use ($self){
+        $directories = array_reduce($this->directories, function ($carry, $directory) use ($self) {
             $path = $self->normalizePath($directory, '');
             $realDirectory = realpath($path);
             if ($realDirectory !== false) {
@@ -134,26 +134,26 @@ class PSR4Namespace
             }
         }, array());
 
-        $arraysOfClasses = array_map(function($directory) use ($self) {
+        $arraysOfClasses = array_map(function ($directory) use ($self) {
             $files = scandir($directory);
-            return array_map(function($file) use ($directory, $self) {
+            return array_map(function ($file) use ($directory, $self) {
                 return $self->normalizePath($directory, $file);
             }, $files);
         }, $directories);
 
-        $potentialDirectories = array_reduce($arraysOfClasses, function($carry, $arrayOfClasses) {
+        $potentialDirectories = array_reduce($arraysOfClasses, function ($carry, $arrayOfClasses) {
             return array_merge($carry, $arrayOfClasses);
         }, array());
 
         // Remove '.' and '..' directories
-        $potentialDirectories = array_filter($potentialDirectories, function($potentialDirectory) {
+        $potentialDirectories = array_filter($potentialDirectories, function ($potentialDirectory) {
             $segments = explode('/', $potentialDirectory);
             $lastSegment = array_pop($segments);
 
             return  $lastSegment !== '.' && $lastSegment !== '..';
         });
 
-        $confirmedDirectories = array_filter($potentialDirectories, function($potentialDirectory) {
+        $confirmedDirectories = array_filter($potentialDirectories, function ($potentialDirectory) {
             return is_dir($potentialDirectory);
         });
 
@@ -171,8 +171,7 @@ class PSR4Namespace
 
         $self = $this;
 
-        $directories = array_reduce($this->directories, function($carry, $directory) use ($relativePath, $namespace, $self){
-
+        $directories = array_reduce($this->directories, function ($carry, $directory) use ($relativePath, $namespace, $self) {
             $path = $self->normalizePath($directory, $relativePath);
             $realDirectory = realpath($path);
 
@@ -183,23 +182,23 @@ class PSR4Namespace
             }
         }, array());
 
-        $arraysOfClasses = array_map(function($directory) {
+        $arraysOfClasses = array_map(function ($directory) {
             return scandir($directory);
         }, $directories);
 
-        $potentialClassFiles = array_reduce($arraysOfClasses, function($carry, $arrayOfClasses) {
+        $potentialClassFiles = array_reduce($arraysOfClasses, function ($carry, $arrayOfClasses) {
             return array_merge($carry, $arrayOfClasses);
         }, array());
 
-        $potentialClasses = array_map(function($file) use ($namespace){
+        $potentialClasses = array_map(function ($file) use ($namespace) {
             return $namespace . '\\' . str_replace('.php', '', $file);
         }, $potentialClassFiles);
 
         if ($options & ClassFinder::RECURSIVE_MODE) {
             return $this->getClassesFromListRecursively($namespace, $options);
         } else {
-            return array_filter($potentialClasses, function($potentialClass) use ($options) {
-                if( strpos( $potentialClass, 'Views') === false) {
+            return array_filter($potentialClasses, function ($potentialClass) use ($options) {
+                if (strpos($potentialClass, 'Views') === false) {
                     if (function_exists($potentialClass)) {
                         // For some reason calling class_exists() on a namespace'd function raises a Fatal Error (tested PHP 7.0.8)
                         // Example: DeepCopy\deep_copy
@@ -223,7 +222,7 @@ class PSR4Namespace
     private function getDirectClassesOnly($options)
     {
         $self = $this;
-        $directories = array_reduce($this->directories, function($carry, $directory) use ($self){
+        $directories = array_reduce($this->directories, function ($carry, $directory) use ($self) {
             $path = $self->normalizePath($directory, '');
             $realDirectory = realpath($path);
             if ($realDirectory !== false) {
@@ -233,21 +232,21 @@ class PSR4Namespace
             }
         }, array());
 
-        $arraysOfClasses = array_map(function($directory) {
+        $arraysOfClasses = array_map(function ($directory) {
             return scandir($directory);
         }, $directories);
 
-        $potentialClassFiles = array_reduce($arraysOfClasses, function($carry, $arrayOfClasses) {
+        $potentialClassFiles = array_reduce($arraysOfClasses, function ($carry, $arrayOfClasses) {
             return array_merge($carry, $arrayOfClasses);
         }, array());
 
         $selfNamespace = $this->namespace; // PHP 5.3 BC
-        $potentialClasses = array_map(function($file) use ($self, $selfNamespace) {
+        $potentialClasses = array_map(function ($file) use ($self, $selfNamespace) {
             return $selfNamespace . str_replace('.php', '', $file);
         }, $potentialClassFiles);
 
-        return array_filter($potentialClasses, function($potentialClass) use ($options) {
-            if( strpos( $potentialClass, 'Views') === false) {
+        return array_filter($potentialClasses, function ($potentialClass) use ($options) {
+            if (strpos($potentialClass, 'Views') === false) {
                 if (function_exists($potentialClass)) {
                     // For some reason calling class_exists() on a namespace'd function raises a Fatal Error (tested PHP 7.0.8)
                     // Example: DeepCopy\deep_copy
@@ -267,18 +266,18 @@ class PSR4Namespace
 
     /**
      * The views folder does not contain classes and is excluded.
-     * 
+     *
      * @param string $namespace
      * @return string[]
      */
     public function getClassesFromListRecursively($namespace, $options)
     {
-        if( strpos( $this->namespace, 'Views') === false) {
-            $initialClasses = strpos( $this->namespace, $namespace) !== false ? $this->getDirectClassesOnly($options) : array();
-            $result = array_reduce($this->getDirectSubnamespaces(), function($carry, PSR4Namespace $subNamespace) use ($namespace, $options) {
+        if (strpos($this->namespace, 'Views') === false) {
+            $initialClasses = strpos($this->namespace, $namespace) !== false ? $this->getDirectClassesOnly($options) : array();
+            $result = array_reduce($this->getDirectSubnamespaces(), function ($carry, PSR4Namespace $subNamespace) use ($namespace, $options) {
                 return array_merge($carry, $subNamespace->getClassesFromListRecursively($namespace, $options));
             }, $initialClasses);
-        }else{
+        } else {
             $result = [];
         }
 

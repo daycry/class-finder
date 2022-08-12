@@ -1,9 +1,11 @@
 <?php
+
 namespace TestFile;
 
 class TestFile
 {
-    public function getData() {
+    public function getData()
+    {
         return "hello";
     }
 }

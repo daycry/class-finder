@@ -30,7 +30,7 @@ class FilesEntry
     {
         $classes = $this->getClassesInFile(ClassFinder::ALLOW_ALL);
 
-        foreach($classes as $class) {
+        foreach ($classes as $class) {
             if (strpos($class, $namespace) !== false) {
                 return true;
             };
@@ -49,11 +49,10 @@ class FilesEntry
     {
         $classes = $this->getClassesInFile($options);
 
-        return array_values(array_filter($classes, function($class) use ($namespace) {
+        return array_values(array_filter($classes, function ($class) use ($namespace) {
             $classNameFragments = explode('\\', $class);
-            
-            if( count($classNameFragments) > 1 )
-            {
+
+            if (count($classNameFragments) > 1) {
                 array_pop($classNameFragments);
             }
 
@@ -77,8 +76,8 @@ class FilesEntry
      */
     private function getClassesInFile($options)
     {
-        list($initialInterfaces, 
-            $initialClasses, 
+        list($initialInterfaces,
+            $initialClasses,
             $initialTraits,
             $initialFuncs
         ) = $this->execReturn("var_export(array(get_declared_interfaces(), get_declared_classes(), get_declared_traits(), get_defined_functions()['user']));");
@@ -121,11 +120,10 @@ class FilesEntry
     {
         exec($this->php . " -r \"$script\"", $output, $return);
 
-        if( !$return )
-        {
+        if (!$return) {
             $classes = 'return ' . implode('', $output) . ';';
             return eval($classes);
-        }else{
+        } else {
             return array(array(),array(), array(), array());
         }
     }
@@ -141,4 +139,3 @@ class FilesEntry
         return $path;
     }
 }
-

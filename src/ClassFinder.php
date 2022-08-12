@@ -7,15 +7,15 @@ use CodeIgniter\Config\BaseConfig;
 
 class ClassFinder
 {
-    const STANDARD_MODE = 1;
-    const RECURSIVE_MODE = 2;
-    
-    const ALLOW_CLASSES = 4;
-    const ALLOW_INTERFACES = 8;
-    const ALLOW_TRAITS = 16;
-    const ALLOW_FUNCTIONS = 32;
+    public const STANDARD_MODE = 1;
+    public const RECURSIVE_MODE = 2;
 
-    const ALLOW_ALL = 60;
+    public const ALLOW_CLASSES = 4;
+    public const ALLOW_INTERFACES = 8;
+    public const ALLOW_TRAITS = 16;
+    public const ALLOW_FUNCTIONS = 32;
+
+    public const ALLOW_ALL = 60;
 
     private array $_finders = [];
 
@@ -28,18 +28,15 @@ class ClassFinder
      */
     private function initialize(BaseConfig $config = null)
     {
-        if( $config === null ) {
+        if ($config === null) {
             $config = config('ClassFinder');
         }
-        
-        foreach( $config->finder as $method => $value )
-        {
-            if( $value === true && isset( $config->finderClass[$method] ) )
-            {
+
+        foreach ($config->finder as $method => $value) {
+            if ($value === true && isset($config->finderClass[$method])) {
                 $class = new $config->finderClass[$method]();
-                if( $class instanceof \Daycry\ClassFinder\Interfaces\FinderInterface )
-                {
-                    array_push( $this->_finders, $class );
+                if ($class instanceof \Daycry\ClassFinder\Interfaces\FinderInterface) {
+                    array_push($this->_finders, $class);
                 }
             }
         }
@@ -61,9 +58,8 @@ class ClassFinder
         }
 
         $findersWithNamespace = $this->_findersWithNamespace($namespace);
-        
-        $classes = array_reduce($findersWithNamespace, function($carry, FinderInterface $finder) use ($namespace, $options){
-            
+
+        $classes = array_reduce($findersWithNamespace, function ($carry, FinderInterface $finder) use ($namespace, $options) {
             return array_merge($carry, $finder->findClasses($namespace, $options));
         }, array());
 

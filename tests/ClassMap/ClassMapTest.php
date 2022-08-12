@@ -40,7 +40,7 @@ class ClassMapTest extends CIUnitTestCase
         $config->finder['PSR4'] = false;
         $config->finder['files'] = false;
 
-        $classes = (new ClassFinder( $config ))->getClassesInNamespace('PhpCsFixer\Diff');
+        $classes = (new ClassFinder($config))->getClassesInNamespace('PhpCsFixer\Diff');
 
         $this->assertContains('PhpCsFixer\Diff\Chunk', $classes);
         $this->assertNotContains('PhpCsFixer\Diff\Chunk\Chunk', $classes);
@@ -52,7 +52,7 @@ class ClassMapTest extends CIUnitTestCase
         $config->finder['PSR4'] = false;
         $config->finder['files'] = false;
 
-        $classes = (new ClassFinder( $config ))->getClassesInNamespace('PhpCsFixer\Diff', ClassFinder::RECURSIVE_MODE | ClassFinder::ALLOW_INTERFACES );
+        $classes = (new ClassFinder($config))->getClassesInNamespace('PhpCsFixer\Diff', ClassFinder::RECURSIVE_MODE | ClassFinder::ALLOW_INTERFACES);
 
         $this->assertContains('PhpCsFixer\Diff\Output\DiffOutputBuilderInterface', $classes);
         $this->assertNotContains('PhpCsFixer\Diff\Parser', $classes);
@@ -64,7 +64,7 @@ class ClassMapTest extends CIUnitTestCase
         $config->finder['PSR4'] = false;
         $config->finder['files'] = false;
 
-        $classes = (new ClassFinder( $config ))->getClassesInNamespace('PhpCsFixer\Diff', ClassFinder::RECURSIVE_MODE );
+        $classes = (new ClassFinder($config))->getClassesInNamespace('PhpCsFixer\Diff', ClassFinder::RECURSIVE_MODE);
 
         $this->assertNotContains('PhpCsFixer\Diff\Output\DiffOutputBuilderInterface', $classes);
         $this->assertContains('PhpCsFixer\Diff\Parser', $classes);

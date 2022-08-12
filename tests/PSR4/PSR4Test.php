@@ -15,7 +15,6 @@ class PSR4Test extends CIUnitTestCase
 
         $structure = $this->getTestStructure();
         $this->root = vfsStream::setup('root', null, $structure);
-
     }
 
     public function getTestStructure()
@@ -86,7 +85,7 @@ EOL;
             ->getMock();
 
         $root = $this->root;
-        $namespace->method('normalizePath')->willReturnCallback(function($directory, $relativePath) use ($root) {
+        $namespace->method('normalizePath')->willReturnCallback(function ($directory, $relativePath) use ($root) {
             return 'vfs://' . $directory . '/' . $relativePath;
         });
 
@@ -104,7 +103,7 @@ EOL;
         $config->finder['classMap'] = false;
         $config->finder['files'] = false;
 
-        $classes = (new ClassFinder)->getClassesInNamespace('Daycry\Twig', ClassFinder::ALLOW_CLASSES);
+        $classes = (new ClassFinder())->getClassesInNamespace('Daycry\Twig', ClassFinder::ALLOW_CLASSES);
 
         $this->assertContains('Daycry\Twig\Twig', $classes);
         $this->assertNotContains('Daycry\Twig\Config\Twig', $classes);
@@ -116,7 +115,7 @@ EOL;
         $config->finder['classMap'] = false;
         $config->finder['files'] = false;
 
-        $classes = (new ClassFinder( $config ))->getClassesInNamespace('Daycry\Twig', ClassFinder::RECURSIVE_MODE);
+        $classes = (new ClassFinder($config))->getClassesInNamespace('Daycry\Twig', ClassFinder::RECURSIVE_MODE);
 
         $this->assertContains('Daycry\Twig\Twig', $classes);
         $this->assertContains('Daycry\Twig\Config\Twig', $classes);

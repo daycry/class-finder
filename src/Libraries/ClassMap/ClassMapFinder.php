@@ -23,8 +23,7 @@ class ClassMapFinder implements FinderInterface
     {
         $classmapEntries = $this->factory->getClassmapEntries();
 
-        $matchingEntries = array_filter($classmapEntries, function(ClassmapEntry $entry) use ($namespace, $options)
-        {
+        $matchingEntries = array_filter($classmapEntries, function (ClassmapEntry $entry) use ($namespace, $options) {
             if (!$entry->matches($namespace, $options)) {
                 return false;
             }
@@ -34,16 +33,16 @@ class ClassMapFinder implements FinderInterface
                 // For some reason calling class_exists() on a namespace'd function raises a Fatal Error (tested PHP 7.0.8)
                 // Example: DeepCopy\deep_copy
                 return $options & ClassFinder::ALLOW_FUNCTIONS;
-            } else if (class_exists($potentialClass)) {
+            } elseif (class_exists($potentialClass)) {
                 return $options & ClassFinder::ALLOW_CLASSES;
-             } else if (interface_exists($potentialClass, false)) {
+            } elseif (interface_exists($potentialClass, false)) {
                 return $options & ClassFinder::ALLOW_INTERFACES;
-             } else if (trait_exists($potentialClass, false)) {
+            } elseif (trait_exists($potentialClass, false)) {
                 return $options & ClassFinder::ALLOW_TRAITS;
             }
         });
 
-        return array_map(function(ClassmapEntry $entry) {
+        return array_map(function (ClassmapEntry $entry) {
             return $entry->getClassName();
         }, $matchingEntries);
     }
@@ -52,7 +51,7 @@ class ClassMapFinder implements FinderInterface
     {
         $classmapEntries = $this->factory->getClassmapEntries();
 
-        foreach($classmapEntries as $classmapEntry) {
+        foreach ($classmapEntries as $classmapEntry) {
             if ($classmapEntry->knowsNamespace($namespace)) {
                 return true;
             }

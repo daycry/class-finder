@@ -34,12 +34,12 @@ class FilesFinder implements FinderInterface
     {
         $filesEntries = $this->factory->getFilesEntries();
 
-        foreach($filesEntries as $filesEntry) {
+        foreach ($filesEntries as $filesEntry) {
             if ($filesEntry->knowsNamespace($namespace)) {
                 return true;
             }
         }
-        
+
         return false;
     }
 
@@ -52,7 +52,7 @@ class FilesFinder implements FinderInterface
     {
         $filesEntries = $this->factory->getFilesEntries();
 
-        return array_reduce($filesEntries, function($carry, FilesEntry $entry) use ($namespace, $options){
+        return array_reduce($filesEntries, function ($carry, FilesEntry $entry) use ($namespace, $options) {
             return array_merge($carry, $entry->getClasses($namespace, $options));
         }, array());
     }

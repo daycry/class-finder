@@ -15,7 +15,7 @@ class FilesFactory
         $phpPath = $this->findPHP();
 
         $filesKeys = array_values($files);
-        return array_map(function($index) use ($filesKeys, $phpPath){
+        return array_map(function ($index) use ($filesKeys, $phpPath) {
             return new FilesEntry($filesKeys[$index], $phpPath);
         }, range(0, count($files) - 1));
     }
@@ -28,7 +28,7 @@ class FilesFactory
      *
      * @return string
      * @throws ClassFinderException
-     * 
+     *
      * @codeCoverageIgnore
      */
     private function findPHP()

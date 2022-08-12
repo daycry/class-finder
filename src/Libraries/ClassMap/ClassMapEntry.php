@@ -55,7 +55,7 @@ class ClassMapEntry
      */
     private function doesMatchAnyNamespace($namespace)
     {
-        return strpos($this->getClassName(),$namespace) === 0;
+        return strpos($this->getClassName(), $namespace) === 0;
     }
 
     /**
@@ -72,7 +72,7 @@ class ClassMapEntry
         $classNamespace = implode('\\', $classNameFragments);
 
         $namespace = trim($namespace, '\\');
-        
+
         return $namespace === $classNamespace;
     }
 }

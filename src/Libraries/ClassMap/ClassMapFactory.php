@@ -15,7 +15,7 @@ class ClassMapFactory extends \Daycry\ClassFinder\Libraries\BaseFactory
         $classmap = $this->getClassMap();
 
         // if classmap has no entries return empty array
-        if(count($classmap) == 0) {
+        if (count($classmap) == 0) {
             // @codeCoverageIgnoreStart
             return array();
             // @codeCoverageIgnoreEnd
@@ -23,7 +23,7 @@ class ClassMapFactory extends \Daycry\ClassFinder\Libraries\BaseFactory
 
         $classmapKeys = array_keys($classmap);
 
-        return array_map(function($index) use ($classmapKeys){
+        return array_map(function ($index) use ($classmapKeys) {
             return new ClassMapEntry($classmapKeys[$index]);
         }, range(0, count($classmap) - 1));
     }

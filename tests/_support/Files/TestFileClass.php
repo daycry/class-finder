@@ -2,7 +2,8 @@
 
 class TestFileClass
 {
-    public function getData() {
+    public function getData()
+    {
         return "hello";
     }
 }

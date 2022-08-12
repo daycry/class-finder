@@ -8,7 +8,6 @@ use Daycry\ClassFinder\ClassFinder;
 use org\bovigo\vfs\vfsStream;
 use org\bovigo\vfs\vfsStreamDirectory;
 
-
 class FilesTest extends CIUnitTestCase
 {
     private $file;
@@ -23,7 +22,9 @@ class FilesTest extends CIUnitTestCase
          * require a change to the class under test, it's probably just easier to use a temporary file.
          */
         $this->file = tmpfile();
-        fwrite($this->file, <<<EOL
+        fwrite(
+            $this->file,
+            <<<EOL
 <?php
 
 namespace Foo\Bar;
@@ -148,7 +149,7 @@ EOL
         $config->finder['PSR4'] = false;
         $config->finder['classMap'] = false;
 
-        $classes = (new ClassFinder( $config ))->getClassesInNamespace('TestFile');
+        $classes = (new ClassFinder($config))->getClassesInNamespace('TestFile');
 
         $this->assertContains('TestFile\TestFile', $classes);
         $this->assertNotContains('PhpCsFixer\Diff\Chunk\Chunk', $classes);
@@ -160,7 +161,7 @@ EOL
         $config->finder['PSR4'] = false;
         $config->finder['classMap'] = false;
 
-        $classes = (new ClassFinder( $config ))->getClassesInNamespace('TestFileClass');
+        $classes = (new ClassFinder($config))->getClassesInNamespace('TestFileClass');
 
         $this->assertContains('TestFileClass', $classes);
         $this->assertNotContains('PhpCsFixer\Diff\Chunk\Chunk', $classes);
@@ -172,7 +173,7 @@ EOL
         $config->finder['PSR4'] = false;
         $config->finder['classMap'] = false;
 
-        $classes = (new ClassFinder( $config ))->getClassesInNamespace('TestFile', ClassFinder::RECURSIVE_MODE);
+        $classes = (new ClassFinder($config))->getClassesInNamespace('TestFile', ClassFinder::RECURSIVE_MODE);
 
         $this->assertContains('TestFile\TestFile', $classes);
         $this->assertNotContains('PhpCsFixer\Diff\Chunk\Chunk', $classes);

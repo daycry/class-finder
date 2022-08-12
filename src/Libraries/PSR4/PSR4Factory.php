@@ -16,9 +16,9 @@ class PSR4Factory extends \Daycry\ClassFinder\Libraries\BaseFactory
         $names = array_keys($namespaces);
         $directories = array_values($namespaces);
         $self = $this;
-        $namespaces = array_map(function($index) use ($self, $names, $directories) {
+        $namespaces = array_map(function ($index) use ($self, $names, $directories) {
             return $self->createNamespace($names[$index], $directories[$index]);
-        },range(0, count($namespaces) - 1));
+        }, range(0, count($namespaces) - 1));
 
         return $namespaces;
     }
@@ -36,14 +36,14 @@ class PSR4Factory extends \Daycry\ClassFinder\Libraries\BaseFactory
         if (is_string($directories)) {
             $directories = array($directories);
         } elseif (is_array($directories)) {
-        // @codeCoverageIgnoreStart
+            // @codeCoverageIgnoreStart
         } else {
             throw new ClassFinderException('Unknown PSR4 definition.');
         }
         // @codeCoverageIgnoreEnd
 
         $self = $this;
-        $directories = array_map(function($directory) use ($self) {
+        $directories = array_map(function ($directory) use ($self) {
             if ($self->isAbsolutePath($directory)) {
                 return $directory;
             // @codeCoverageIgnoreStart
@@ -53,7 +53,7 @@ class PSR4Factory extends \Daycry\ClassFinder\Libraries\BaseFactory
             // @codeCoverageIgnoreEnd
         }, $directories);
 
-        $directories = array_filter(array_map(function($directory) {
+        $directories = array_filter(array_map(function ($directory) {
             return realpath($directory);
         }, $directories));
 
@@ -76,7 +76,7 @@ class PSR4Factory extends \Daycry\ClassFinder\Libraries\BaseFactory
         $directories = $psr4Namespace->findDirectories();
 
         $self = $this;
-        $subnamespaces = array_map(function($directory) use ($self, $psr4Namespace){
+        $subnamespaces = array_map(function ($directory) use ($self, $psr4Namespace) {
             $segments = explode('/', $directory);
 
             $subnamespaceSegment = array_pop($segments);
@@ -100,7 +100,8 @@ class PSR4Factory extends \Daycry\ClassFinder\Libraries\BaseFactory
      * @return bool
      * @throws ClassFinderException
      */
-    public function isAbsolutePath($path) {
+    public function isAbsolutePath($path)
+    {
         // @codeCoverageIgnoreStart
         if (!is_string($path)) {
             $mess = sprintf('String expected but was given %s', gettype($path));
