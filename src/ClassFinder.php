@@ -56,6 +56,10 @@ class ClassFinder
      */
     public function getClassesInNamespace($namespace, $options = self::STANDARD_MODE)
     {
+        if (!($options & (self::ALLOW_INTERFACES | self::ALLOW_TRAITS))) {
+            $options |= self::ALLOW_CLASSES;
+        }
+
         $findersWithNamespace = $this->_findersWithNamespace($namespace);
         
         $classes = array_reduce($findersWithNamespace, function($carry, FinderInterface $finder) use ($namespace, $options){

@@ -3,6 +3,7 @@
 namespace Daycry\ClassFinder\Libraries\PSR4;
 
 use Daycry\ClassFinder\Interfaces\FinderInterface;
+use Daycry\ClassFinder\ClassFinder;
 
 class PSR4Finder implements FinderInterface
 {
@@ -13,9 +14,9 @@ class PSR4Finder implements FinderInterface
         $this->factory = new PSR4Factory();
     }
 
-    public function findClasses(string $namespace, int $options)
+    public function findClasses(string $namespace, $options)
     {
-        if ($options === \Daycry\ClassFinder\ClassFinder::RECURSIVE_MODE) {
+        if ($options & ClassFinder::RECURSIVE_MODE) {
             $applicableNamespaces = $this->_findAllApplicableNamespaces($namespace);
         }
         

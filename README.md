@@ -87,3 +87,15 @@ $config->finder['files'] = false;
 
 $classes = (new \Daycry\ClassFinder\ClassFinder($config))->getClassesInNamespace('Daycry', \Daycry\ClassFinder\ClassFinder::RECURSIVE_MODE);
 ```
+
+You can customize the search engine indicating if you want to search for classes, interfaces, traits or functions.
+
+```php
+<?php
+$config = config('ClassFinder');
+
+$config->finder['classMap'] = false;
+$config->finder['files'] = false;
+
+$classes = (new \Daycry\ClassFinder\ClassFinder($config))->getClassesInNamespace('Daycry', \Daycry\ClassFinder\ClassFinder::RECURSIVE_MODE | \Daycry\ClassFinder\ClassFinder::ALLOW_CLASSES | \Daycry\ClassFinder\ClassFinder::ALLOW_INTERFACES | \Daycry\ClassFinder\ClassFinder::ALLOW_TRAITS | \Daycry\ClassFinder\ClassFinder::ALLOW_FUNCTIONS );
+```

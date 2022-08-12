@@ -2,6 +2,8 @@
 
 namespace Daycry\ClassFinder\Libraries\Files;
 
+use Daycry\ClassFinder\ClassFinder;
+
 class FilesEntry
 {
     /** @var string */
@@ -26,7 +28,7 @@ class FilesEntry
      */
     public function knowsNamespace($namespace)
     {
-        $classes = $this->getClassesInFile();
+        $classes = $this->getClassesInFile(ClassFinder::ALLOW_ALL);
 
         foreach($classes as $class) {
             if (strpos($class, $namespace) !== false) {
@@ -43,9 +45,9 @@ class FilesEntry
      * @param string $namespace
      * @return string[]
      */
-    public function getClasses($namespace)
+    public function getClasses($namespace, $options)
     {
-        $classes = $this->getClassesInFile();
+        $classes = $this->getClassesInFile($options);
 
         return array_values(array_filter($classes, function($class) use ($namespace) {
             $classNameFragments = explode('\\', $class);
@@ -73,31 +75,59 @@ class FilesEntry
      *
      * @return array
      */
-    private function getClassesInFile()
+    private function getClassesInFile($options)
     {
-        // get_declared_classes() returns a bunch of classes that are built into PHP. So we need a control here.
-        $script = "var_export(get_declared_classes());";
-        exec($this->php . " -r \"$script\"", $output);
-        $classes = 'return ' . implode('', $output) . ';';
-
-        $initialClasses = eval($classes);
-
-        // clear the exec() buffer.
-        unset($output);
+        list($initialInterfaces, 
+            $initialClasses, 
+            $initialTraits,
+            $initialFuncs
+        ) = $this->execReturn("var_export(array(get_declared_interfaces(), get_declared_classes(), get_declared_traits(), get_defined_functions()['user']));");
 
         // This brings in the new classes. so $classes here will include the PHP defaults and the newly defined classes
-        $script = "require_once '{$this->file}'; var_export(get_declared_classes());";
-        exec($this->php . ' -r "' . $script . '"', $output, $return);
+        list($allInterfaces,
+            $allClasses,
+            $allTraits,
+            $allFuncs
+        ) = $this->execReturn("require_once '{$this->file}'; var_export(array(get_declared_interfaces(), get_declared_classes(), get_declared_traits(), get_defined_functions()['user']));");
+
+        $interfaces = array_diff($allInterfaces, $initialInterfaces);
+        $classes = array_diff($allClasses, $initialClasses);
+        $traits = array_diff($allTraits, $initialTraits);
+        $funcs = array_diff($allFuncs, $initialFuncs);
+
+        $final = array();
+        if ($options & ClassFinder::ALLOW_CLASSES) {
+            $final = $classes;
+        }
+        if ($options & ClassFinder::ALLOW_INTERFACES) {
+            $final = array_merge($final, $interfaces);
+        }
+        if ($options & ClassFinder::ALLOW_TRAITS) {
+            $final = array_merge($final, $traits);
+        }
+        if ($options & ClassFinder::ALLOW_FUNCTIONS) {
+            $final = array_merge($final, $funcs);
+        }
+        return $final;
+    }
+
+    /**
+     * Execute PHP code and return retuend value
+     *
+     * @param string $script
+     * @return mixed
+     */
+    private function execReturn($script)
+    {
+        exec($this->php . " -r \"$script\"", $output, $return);
 
         if( !$return )
         {
             $classes = 'return ' . implode('', $output) . ';';
-            $allClasses = eval($classes);
+            return eval($classes);
         }else{
-            $allClasses = array();
+            return array(array(),array(), array(), array());
         }
-
-        return array_diff($allClasses, $initialClasses);
     }
 
     /**

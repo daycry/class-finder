@@ -104,7 +104,7 @@ EOL;
         $config->finder['classMap'] = false;
         $config->finder['files'] = false;
 
-        $classes = (new ClassFinder)->getClassesInNamespace('Daycry\Twig');
+        $classes = (new ClassFinder)->getClassesInNamespace('Daycry\Twig', ClassFinder::ALLOW_CLASSES);
 
         $this->assertContains('Daycry\Twig\Twig', $classes);
         $this->assertNotContains('Daycry\Twig\Config\Twig', $classes);

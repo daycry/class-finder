@@ -32,7 +32,7 @@ class ClassMapEntry
      */
     public function matches($namespace, $options)
     {
-        if ($options === ClassFinder::RECURSIVE_MODE) {
+        if ($options & ClassFinder::RECURSIVE_MODE) {
             return $this->doesMatchAnyNamespace($namespace);
         } else {
             return $this->doesMatchDirectNamespace($namespace);

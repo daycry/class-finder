@@ -46,15 +46,27 @@ class ClassMapTest extends CIUnitTestCase
         $this->assertNotContains('PhpCsFixer\Diff\Chunk\Chunk', $classes);
     }
 
+    public function testRecursiveInterfaceFind()
+    {
+        $config = config('ClassFinder');
+        $config->finder['PSR4'] = false;
+        $config->finder['files'] = false;
+
+        $classes = (new ClassFinder( $config ))->getClassesInNamespace('PhpCsFixer\Diff', ClassFinder::RECURSIVE_MODE | ClassFinder::ALLOW_INTERFACES );
+
+        $this->assertContains('PhpCsFixer\Diff\Output\DiffOutputBuilderInterface', $classes);
+        $this->assertNotContains('PhpCsFixer\Diff\Parser', $classes);
+    }
+
     public function testRecursiveFind()
     {
         $config = config('ClassFinder');
         $config->finder['PSR4'] = false;
         $config->finder['files'] = false;
 
-        $classes = (new ClassFinder( $config ))->getClassesInNamespace('PhpCsFixer\Diff', ClassFinder::RECURSIVE_MODE);
+        $classes = (new ClassFinder( $config ))->getClassesInNamespace('PhpCsFixer\Diff', ClassFinder::RECURSIVE_MODE );
 
-        $this->assertContains('PhpCsFixer\Diff\Output\DiffOutputBuilderInterface', $classes);
+        $this->assertNotContains('PhpCsFixer\Diff\Output\DiffOutputBuilderInterface', $classes);
         $this->assertContains('PhpCsFixer\Diff\Parser', $classes);
     }
 
