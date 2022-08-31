@@ -3,8 +3,9 @@
 namespace Daycry\ClassFinder\Libraries\Files;
 
 use Daycry\ClassFinder\Exceptions\ClassFinderException;
+use Daycry\ClassFinder\Libraries\BaseFactory;
 
-class FilesFactory
+class FilesFactory extends BaseFactory
 {
     /**
      * @return FilesEntry[]
@@ -12,6 +13,8 @@ class FilesFactory
     public function getFilesEntries()
     {
         $files = require(ROOTPATH . 'vendor/composer/autoload_files.php');
+        $files = \array_merge($files, $this->loadAutoloadConfigFiles());
+
         $phpPath = $this->findPHP();
 
         $filesKeys = array_values($files);

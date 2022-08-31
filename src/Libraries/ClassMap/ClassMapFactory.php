@@ -3,9 +3,9 @@
 namespace Daycry\ClassFinder\Libraries\ClassMap;
 
 use Daycry\ClassFinder\Exceptions\ClassFinderException;
-use Daycry\ClassFinder\Libraries\PSR4\PSR4Namespace;
+use Daycry\ClassFinder\Libraries\BaseFactory;
 
-class ClassMapFactory extends \Daycry\ClassFinder\Libraries\BaseFactory
+class ClassMapFactory extends BaseFactory
 {
     /**
      * @return string[]
@@ -13,6 +13,7 @@ class ClassMapFactory extends \Daycry\ClassFinder\Libraries\BaseFactory
     public function getClassMapEntries()
     {
         $classmap = $this->getClassMap();
+        $classmap = \array_merge($classmap, $this->loadAutoloadConfigClassMap());
 
         // if classmap has no entries return empty array
         if (count($classmap) == 0) {

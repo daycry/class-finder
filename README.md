@@ -90,6 +90,20 @@ $classes = (new \Daycry\ClassFinder\ClassFinder($config))->getClassesInNamespace
 
 You can customize the search engine indicating if you want to search for classes, interfaces, traits or functions.
 
+This library also integrates the **Autoload.php** class from the **Config** folder to perform searches.
+
+```php
+<?php
+$config = config('ClassFinder');
+
+$config->finder['classMap'] = false;
+$config->finder['files'] = false;
+
+$classes = (new \Daycry\ClassFinder\ClassFinder($config))->getClassesInNamespace('App', \Daycry\ClassFinder\ClassFinder::RECURSIVE_MODE);
+
+$classes = (new \Daycry\ClassFinder\ClassFinder($config))->getClassesInNamespace('Config', \Daycry\ClassFinder\ClassFinder::RECURSIVE_MODE);
+```
+
 ```php
 <?php
 $config = config('ClassFinder');

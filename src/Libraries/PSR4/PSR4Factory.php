@@ -3,8 +3,9 @@
 namespace Daycry\ClassFinder\Libraries\PSR4;
 
 use Daycry\ClassFinder\Exceptions\ClassFinderException;
+use Daycry\ClassFinder\Libraries\BaseFactory;
 
-class PSR4Factory extends \Daycry\ClassFinder\Libraries\BaseFactory
+class PSR4Factory extends BaseFactory
 {
     /**
      * @return string[]
@@ -12,6 +13,7 @@ class PSR4Factory extends \Daycry\ClassFinder\Libraries\BaseFactory
     public function getPSR4Namespaces()
     {
         $namespaces = $this->getPSR4();
+        $namespaces = \array_merge($namespaces, $this->loadAutoloadConfigPsr4());
 
         $names = array_keys($namespaces);
         $directories = array_values($namespaces);
