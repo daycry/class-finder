@@ -5,7 +5,7 @@
 
 A dead simple utility to identify classes in a given namespace for Codeigniter 4
 
-[![Build Status](https://github.com/daycry/class-finder/workflows/PHP%20Tests/badge.svg)](https://github.com/daycry/class-finder/actions?query=workflow%3A%22PHP+Tests%22)
+[![Build Status](https://github.com/daycry/class-finder/actions/workflows/php.yml/badge.svg)](https://github.com/daycry/class-finder/actions/workflows/php.yml)
 [![Coverage Status](https://coveralls.io/repos/github/daycry/class-finder/badge.svg?branch=master)](https://coveralls.io/github/daycry/class-finder?branch=master)
 [![Downloads](https://poser.pugx.org/daycry/class-finder/downloads)](https://packagist.org/packages/daycry/class-finder)
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/daycry/class-finder)](https://packagist.org/packages/daycry/class-finder)
