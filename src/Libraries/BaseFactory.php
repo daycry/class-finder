@@ -1,65 +1,82 @@
 <?php
 
 namespace Daycry\ClassFinder\Libraries;
+
 use Config\Autoload;
 
 class BaseFactory
 {
     private $composer;
-    private Autoload $config;
-    
+    private ?Autoload $config                   = null;
+    private ?array $classMapCache               = null;
+    private ?array $psr4Cache                   = null;
+    private ?array $autoloadConfigPsr4Cache     = null;
+    private ?array $autoloadConfigClassMapCache = null;
+    private ?array $autoloadConfigFilesCache    = null;
+
     public function __construct()
     {
         $this->composer = include COMPOSER_PATH;
-        $this->config = new Autoload();
-    }
-    protected function getClassMap() :array
-    {
-        return $this->composer->getClassMap();
     }
 
-    protected function getPSR4() :array
+    private function getConfig(): Autoload
     {
-        return $this->composer->getPrefixesPsr4();
+        return $this->config ??= new Autoload();
     }
 
-    protected function loadAutoloadConfigPsr4() :array
+    protected function getClassMap(): array
     {
+        return $this->classMapCache ??= $this->composer->getClassMap();
+    }
+
+    protected function getPSR4(): array
+    {
+        return $this->psr4Cache ??= $this->composer->getPrefixesPsr4();
+    }
+
+    protected function loadAutoloadConfigPsr4(): array
+    {
+        if ($this->autoloadConfigPsr4Cache !== null) {
+            return $this->autoloadConfigPsr4Cache;
+        }
+
         $namespaces = [];
-        foreach( $this->config->psr4 as $psr4 => $dir )
-        {
-            if( substr($psr4, -1) != '\\' )
-            {
-                $psr4 = $psr4 . '\\';
-            }
+        $config     = $this->getConfig();
 
-            $namespaces[$psr4] = array($dir);
+        foreach ($config->psr4 as $psr4 => $dir) {
+            $psr4              = rtrim($psr4, '\\') . '\\';
+            $namespaces[$psr4] = [$dir];
         }
 
-        return $namespaces;
+        return $this->autoloadConfigPsr4Cache = $namespaces;
     }
 
-    protected function loadAutoloadConfigClassMap() :array
+    protected function loadAutoloadConfigClassMap(): array
     {
-        $classmap = [];
-        foreach( $this->config->classmap as $c => $dir )
-        {
-            $classmap[$c] = $dir;
+        if ($this->autoloadConfigClassMapCache !== null) {
+            return $this->autoloadConfigClassMapCache;
         }
 
-        return $classmap;
+        $config = $this->getConfig();
+
+        return $this->autoloadConfigClassMapCache = $config->classmap;
     }
 
-    protected function loadAutoloadConfigFiles() :array
+    protected function loadAutoloadConfigFiles(): array
     {
+        if ($this->autoloadConfigFilesCache !== null) {
+            return $this->autoloadConfigFilesCache;
+        }
+
         helper('text');
 
-        $files = [];
-        foreach( $this->config->files as $file )
-        {
+        $files  = [];
+        $config = $this->getConfig();
+
+        foreach ($config->files as $file) {
             $files[random_string('alnum', 32)] = $file;
         }
 
-        return $files;
+        return $this->autoloadConfigFilesCache = $files;
     }
 }

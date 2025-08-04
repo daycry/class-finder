@@ -3,37 +3,31 @@
 namespace Daycry\ClassFinder\Libraries\Files;
 
 use Daycry\ClassFinder\ClassFinder;
+use PhpParser\Error;
+use PhpParser\NodeTraverser;
+use PhpParser\ParserFactory;
 
 class FilesEntry
 {
-    /** @var string */
-    private $file;
+    private string $file;
+    private string $php;
+    private ?array $cachedClasses                = null;
+    private static ?ParserFactory $parserFactory = null;
 
-    /** @var string */
-    private $php;
-
-    /**
-     * @param string $fileToInclude
-     * @param string $php
-     */
-    public function __construct($fileToInclude, $php)
+    public function __construct(string $fileToInclude, string $php)
     {
         $this->file = $this->normalizePath($fileToInclude);
-        $this->php = $php;
+        $this->php  = $php;
     }
 
-    /**
-     * @param string $namespace
-     * @return bool
-     */
-    public function knowsNamespace($namespace)
+    public function knowsNamespace(string $namespace): bool
     {
         $classes = $this->getClassesInFile(ClassFinder::ALLOW_ALL);
 
         foreach ($classes as $class) {
-            if (strpos($class, $namespace) !== false) {
+            if (str_contains($class, $namespace)) {
                 return true;
-            };
+            }
         }
 
         return false;
@@ -42,14 +36,13 @@ class FilesEntry
     /**
      * Gets a list of classes that belong to the given namespace.
      *
-     * @param string $namespace
-     * @return string[]
+     * @return list<string>
      */
-    public function getClasses($namespace, $options)
+    public function getClasses(string $namespace, int $options): array
     {
         $classes = $this->getClassesInFile($options);
 
-        return array_values(array_filter($classes, function ($class) use ($namespace) {
+        return array_values(array_filter($classes, static function ($class) use ($namespace) {
             $classNameFragments = explode('\\', $class);
 
             if (count($classNameFragments) > 1) {
@@ -57,8 +50,7 @@ class FilesEntry
             }
 
             $classNamespace = implode('\\', $classNameFragments);
-
-            $namespace = trim($namespace, '\\');
+            $namespace      = trim($namespace, '\\');
 
             return $namespace === $classNamespace;
         }));
@@ -67,75 +59,124 @@ class FilesEntry
     /**
      * Dynamically execute files and check for defined classes.
      *
-     * This is where the real magic happens. Since classes in a randomly included file could contain classes in any namespace,
-     * (or even multiple namespaces!) we must execute the file and check for newly defined classes. This has a potential
-     * downside that files being executed will execute their side effects - which may be undesirable. However, Composer
-     * will require these files anyway - so hopefully causing those side effects isn't that big of a deal.
-     *
-     * @return array
+     * Uses static analysis with PHP-Parser for better performance and security.
      */
-    private function getClassesInFile($options)
+    private function getClassesInFile(int $options): array
     {
-        list($initialInterfaces,
-            $initialClasses,
-            $initialTraits,
-            $initialFuncs
-        ) = $this->execReturn("var_export(array(get_declared_interfaces(), get_declared_classes(), get_declared_traits(), get_defined_functions()['user']));");
+        if ($this->cachedClasses !== null) {
+            return $this->filterClassesByOptions($this->cachedClasses, $options);
+        }
 
-        // This brings in the new classes. so $classes here will include the PHP defaults and the newly defined classes
-        list($allInterfaces,
-            $allClasses,
-            $allTraits,
-            $allFuncs
-        ) = $this->execReturn("require_once '{$this->file}'; var_export(array(get_declared_interfaces(), get_declared_classes(), get_declared_traits(), get_defined_functions()['user']));");
+        try {
+            // Try static analysis first (faster and safer)
+            $this->cachedClasses = $this->parseFileStatically();
+        } catch (Error $e) {
+            // Fallback to dynamic analysis if static analysis fails
+            $this->cachedClasses = $this->parseFileDynamically();
+        }
 
-        $interfaces = array_diff($allInterfaces, $initialInterfaces);
-        $classes = array_diff($allClasses, $initialClasses);
-        $traits = array_diff($allTraits, $initialTraits);
-        $funcs = array_diff($allFuncs, $initialFuncs);
+        return $this->filterClassesByOptions($this->cachedClasses, $options);
+    }
 
-        $final = array();
+    /**
+     * Parse PHP file using static analysis (PHP-Parser)
+     */
+    private function parseFileStatically(): array
+    {
+        if (! file_exists($this->file)) {
+            return ['classes' => [], 'interfaces' => [], 'traits' => [], 'functions' => []];
+        }
+
+        $code = file_get_contents($this->file);
+        if ($code === false) {
+            return ['classes' => [], 'interfaces' => [], 'traits' => [], 'functions' => []];
+        }
+
+        if (self::$parserFactory === null) {
+            self::$parserFactory = new ParserFactory();
+        }
+
+        // Fixed API call for php-parser v5.x
+        $parser = self::$parserFactory->createForNewestSupportedVersion();
+        $ast    = $parser->parse($code);
+
+        if ($ast === null) {
+            return ['classes' => [], 'interfaces' => [], 'traits' => [], 'functions' => []];
+        }
+
+        $visitor   = new ClassExtractionVisitor();
+        $traverser = new NodeTraverser();
+        $traverser->addVisitor($visitor);
+        $traverser->traverse($ast);
+
+        return $visitor->getAllElements();
+    }
+
+    /**
+     * Fallback: Parse file using dynamic analysis (original exec method)
+     */
+    private function parseFileDynamically(): array
+    {
+        $initialData = $this->execReturn("var_export(array(get_declared_interfaces(), get_declared_classes(), get_declared_traits(), get_defined_functions()['user']));");
+
+        $allData = $this->execReturn("require_once '{$this->file}'; var_export(array(get_declared_interfaces(), get_declared_classes(), get_declared_traits(), get_defined_functions()['user']));");
+
+        return [
+            'interfaces' => array_diff($allData[0], $initialData[0]),
+            'classes'    => array_diff($allData[1], $initialData[1]),
+            'traits'     => array_diff($allData[2], $initialData[2]),
+            'functions'  => array_diff($allData[3], $initialData[3]),
+        ];
+    }
+
+    /**
+     * Filter cached classes by options
+     */
+    private function filterClassesByOptions(array $cachedClasses, int $options): array
+    {
+        $final = [];
+
         if ($options & ClassFinder::ALLOW_CLASSES) {
-            $final = $classes;
+            $final = array_merge($final, $cachedClasses['classes']);
         }
         if ($options & ClassFinder::ALLOW_INTERFACES) {
-            $final = array_merge($final, $interfaces);
+            $final = array_merge($final, $cachedClasses['interfaces']);
         }
         if ($options & ClassFinder::ALLOW_TRAITS) {
-            $final = array_merge($final, $traits);
+            $final = array_merge($final, $cachedClasses['traits']);
         }
         if ($options & ClassFinder::ALLOW_FUNCTIONS) {
-            $final = array_merge($final, $funcs);
+            $final = array_merge($final, $cachedClasses['functions']);
         }
+
         return $final;
     }
 
     /**
-     * Execute PHP code and return retuend value
+     * Execute PHP code and return returned value
      *
-     * @param string $script
      * @return mixed
      */
-    private function execReturn($script)
+    private function execReturn(string $script): array
     {
-        exec($this->php . " -r \"$script\"", $output, $return);
+        $command = $this->php . " -r \"{$script}\"";
+        exec($command, $output, $return);
 
-        if (!$return) {
+        if ($return === 0 && ! empty($output)) {
             $classes = 'return ' . implode('', $output) . ';';
-            return eval($classes);
-        } else {
-            return array(array(),array(), array(), array());
+            $result  = eval($classes);
+
+            return is_array($result) ? $result : [[], [], [], []];
         }
+
+        return [[], [], [], []];
     }
 
     /**
-     * TODO: Similar to PSR4Namespace::normalizePath. Maybe we refactor?
-     * @param string $path
-     * @return string
+     * Normalize file path separators
      */
-    private function normalizePath($path)
+    private function normalizePath(string $path): string
     {
-        $path = str_replace('\\', '/', $path);
-        return $path;
+        return str_replace('\\', '/', $path);
     }
 }

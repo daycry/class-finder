@@ -7,30 +7,29 @@ use Daycry\ClassFinder\Interfaces\FinderInterface;
 
 class FilesFinder implements FinderInterface
 {
-    /** @var FilesEntryFactory */
-    private $factory;
+    private FilesFactory $factory;
 
     /**
-     * @param FilesEntryFactory $factory
      * @throws ClassFinderException
      */
     public function __construct()
     {
         $this->factory = new FilesFactory();
 
-        if (!function_exists('exec')) {
+        if (! function_exists('exec')) {
             throw new ClassFinderException(sprintf(
                 'FilesFinder requires that exec() is available. Check your php.ini to see if it is disabled. See "%s" for details.',
-                'https://gitlab.com/hpierce1102/ClassFinder/blob/master/docs/exceptions/filesExecNotAvailable.md'
+                'https://gitlab.com/hpierce1102/ClassFinder/blob/master/docs/exceptions/filesExecNotAvailable.md',
             ));
         }
     }
 
-    /**
-     * @param string $namespace
-     * @return bool
-     */
-    public function isNamespaceKnown($namespace)
+    public function getPriority(): int
+    {
+        return 3; // Low priority for Files
+    }
+
+    public function isNamespaceKnown(string $namespace): bool
     {
         $filesEntries = $this->factory->getFilesEntries();
 
@@ -44,16 +43,18 @@ class FilesFinder implements FinderInterface
     }
 
     /**
-     * @param string $namespace
-     * @param int $options
-     * @return string[]
+     * @return list<string>
      */
-    public function findClasses($namespace, $options)
+    public function findClasses(string $namespace, int $options): array
     {
         $filesEntries = $this->factory->getFilesEntries();
 
-        return array_reduce($filesEntries, function ($carry, FilesEntry $entry) use ($namespace, $options) {
-            return array_merge($carry, $entry->getClasses($namespace, $options));
-        }, array());
+        $classes = [];
+
+        foreach ($filesEntries as $entry) {
+            $classes = array_merge($classes, $entry->getClasses($namespace, $options));
+        }
+
+        return $classes;
     }
 }

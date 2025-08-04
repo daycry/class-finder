@@ -7,56 +7,70 @@ use Daycry\ClassFinder\Libraries\BaseFactory;
 
 class FilesFactory extends BaseFactory
 {
+    private ?array $filesEntriesCache = null;
+    private ?string $phpPathCache     = null;
+
     /**
-     * @return FilesEntry[]
+     * @return list<FilesEntry>
      */
-    public function getFilesEntries()
+    public function getFilesEntries(): array
     {
-        $files = require(ROOTPATH . 'vendor/composer/autoload_files.php');
-        $files = \array_merge($files, $this->loadAutoloadConfigFiles());
+        if ($this->filesEntriesCache !== null) {
+            return $this->filesEntriesCache;
+        }
 
-        $phpPath = $this->findPHP();
+        $files = array_merge(
+            require (ROOTPATH . 'vendor/composer/autoload_files.php'),
+            $this->loadAutoloadConfigFiles(),
+        );
 
-        $filesKeys = array_values($files);
-        return array_map(function ($index) use ($filesKeys, $phpPath) {
-            return new FilesEntry($filesKeys[$index], $phpPath);
-        }, range(0, count($files) - 1));
+        if (empty($files)) {
+            return $this->filesEntriesCache = [];
+        }
+
+        // PHP path is only needed for fallback dynamic analysis
+        $phpPath      = $this->findPHP();
+        $filesEntries = [];
+
+        foreach (array_values($files) as $file) {
+            $filesEntries[] = new FilesEntry($file, $phpPath);
+        }
+
+        return $this->filesEntriesCache = $filesEntries;
     }
 
     /**
-     * Locates the PHP interrupter.
+     * Locates the PHP interpreter.
      *
      * If PHP 5.4 or newer is used, the PHP_BINARY value is used.
      * Otherwise we attempt to find it from shell commands.
      *
-     * @return string
      * @throws ClassFinderException
      *
      * @codeCoverageIgnore
      */
-    private function findPHP()
+    private function findPHP(): string
     {
-        if (defined("PHP_BINARY")) {
-            // PHP_BINARY was made available in PHP 5.4
-            $php = PHP_BINARY;
-        } else {
-            $isHostWindows = strtoupper(substr(PHP_OS, 0, 3)) === 'WIN';
-            if ($isHostWindows) {
-                exec('where php', $output);
-                $php = $output[0];
-            } else {
-                exec('which php', $output);
-                $php = $output[0];
-            }
+        if ($this->phpPathCache !== null) {
+            return $this->phpPathCache;
         }
 
-        if (!isset($php)) {
-            throw new ClassFinderException(sprintf(
-                'Could not locate PHP interrupter. See "%s" for details.',
-                'https://gitlab.com/hpierce1102/ClassFinder/blob/master/docs/exceptions/filesCouldNotLocatePHP.md'
-            ));
+        if (defined('PHP_BINARY') && ! empty(PHP_BINARY)) {
+            return $this->phpPathCache = PHP_BINARY;
         }
 
-        return $php;
+        $isHostWindows = strtoupper(substr(PHP_OS, 0, 3)) === 'WIN';
+        $command       = $isHostWindows ? 'where php' : 'which php';
+
+        exec($command, $output, $return);
+
+        if ($return === 0 && ! empty($output[0])) {
+            return $this->phpPathCache = $output[0];
+        }
+
+        throw new ClassFinderException(sprintf(
+            'Could not locate PHP interpreter. See "%s" for details.',
+            'https://gitlab.com/hpierce1102/ClassFinder/blob/master/docs/exceptions/filesCouldNotLocatePHP.md',
+        ));
     }
 }

@@ -2,81 +2,89 @@
 
 namespace Daycry\ClassFinder;
 
-use Daycry\ClassFinder\Interfaces\FinderInterface;
 use CodeIgniter\Config\BaseConfig;
+use Daycry\ClassFinder\Config\ClassFinder as ClassFinderConfig;
+use Daycry\ClassFinder\Interfaces\FinderInterface;
+use Exception;
 
 class ClassFinder
 {
-    public const STANDARD_MODE = 1;
-    public const RECURSIVE_MODE = 2;
-
-    public const ALLOW_CLASSES = 4;
+    public const STANDARD_MODE    = 1;
+    public const RECURSIVE_MODE   = 2;
+    public const ALLOW_CLASSES    = 4;
     public const ALLOW_INTERFACES = 8;
-    public const ALLOW_TRAITS = 16;
-    public const ALLOW_FUNCTIONS = 32;
+    public const ALLOW_TRAITS     = 16;
+    public const ALLOW_FUNCTIONS  = 32;
+    public const ALLOW_ALL        = 60;
 
-    public const ALLOW_ALL = 60;
+    private array $finders                           = [];
+    private static ?ClassFinderConfig $defaultConfig = null;
+    private array $namespaceCache                    = [];
 
-    private array $_finders = [];
-
-    public function __construct(BaseConfig $config = null)
+    public function __construct(?BaseConfig $config = null)
     {
         $this->initialize($config);
     }
-    /**
-     * @return void
-     */
-    private function initialize(BaseConfig $config = null)
+
+    private function initialize(?BaseConfig $config = null): void
     {
         if ($config === null) {
-            $config = config('ClassFinder');
+            $config = self::$defaultConfig ??= config('ClassFinder');
         }
 
         foreach ($config->finder as $method => $value) {
             if ($value === true && isset($config->finderClass[$method])) {
-                $class = new $config->finderClass[$method]();
-                if ($class instanceof \Daycry\ClassFinder\Interfaces\FinderInterface) {
-                    array_push($this->_finders, $class);
+                $finderClass = $config->finderClass[$method];
+                if (class_exists($finderClass)) {
+                    $class = new $finderClass();
+                    if ($class instanceof FinderInterface) {
+                        $this->finders[] = $class;
+                    }
                 }
             }
         }
+
+        // Sort finders by priority (lower number = higher priority)
+        usort($this->finders, static fn (FinderInterface $a, FinderInterface $b) => $a->getPriority() <=> $b->getPriority());
     }
 
     /**
      * Identify classes in a given namespace.
      *
-     * @param string $namespace
-     * @param int $options
-     * @return string[]
+     * @return list<string>
      *
-     * @throws \Exception
+     * @throws Exception
      */
-    public function getClassesInNamespace($namespace, $options = self::STANDARD_MODE)
+    public function getClassesInNamespace(string $namespace, int $options = self::STANDARD_MODE): array
     {
-        if (!($options & (self::ALLOW_INTERFACES | self::ALLOW_TRAITS))) {
+        if (! ($options & (self::ALLOW_INTERFACES | self::ALLOW_TRAITS))) {
             $options |= self::ALLOW_CLASSES;
         }
 
-        $findersWithNamespace = $this->_findersWithNamespace($namespace);
+        $cacheKey = $namespace . '_' . $options;
+        if (isset($this->namespaceCache[$cacheKey])) {
+            return $this->namespaceCache[$cacheKey];
+        }
 
-        $classes = array_reduce($findersWithNamespace, function ($carry, FinderInterface $finder) use ($namespace, $options) {
-            return array_merge($carry, $finder->findClasses($namespace, $options));
-        }, array());
+        $findersWithNamespace = $this->findersWithNamespace($namespace);
 
+        $classes = [];
 
-        return array_unique($classes);
+        foreach ($findersWithNamespace as $finder) {
+            $classes = array_merge($classes, $finder->findClasses($namespace, $options));
+        }
+
+        $result                          = array_unique($classes);
+        $this->namespaceCache[$cacheKey] = $result;
+
+        return $result;
     }
 
     /**
-     * @param string $namespace
-     * @return FinderInterface[]
+     * @return list<FinderInterface>
      */
-    private function _findersWithNamespace($namespace)
+    private function findersWithNamespace(string $namespace): array
     {
-        $findersWithNamespace = array_filter($this->_finders, function (FinderInterface $finder) use ($namespace) {
-            return $finder->isNamespaceKnown($namespace);
-        });
-
-        return $findersWithNamespace;
+        return array_filter($this->finders, static fn (FinderInterface $finder) => $finder->isNamespaceKnown($namespace));
     }
 }

@@ -40,10 +40,10 @@ class ClassMapTest extends CIUnitTestCase
         $config->finder['PSR4'] = false;
         $config->finder['files'] = false;
 
-        $classes = (new ClassFinder($config))->getClassesInNamespace('PhpCsFixer\Diff');
+        $classes = (new ClassFinder($config))->getClassesInNamespace('SebastianBergmann\Diff');
 
-        $this->assertContains('PhpCsFixer\Diff\Chunk', $classes);
-        $this->assertNotContains('PhpCsFixer\Diff\Chunk\Chunk', $classes);
+        $this->assertContains('SebastianBergmann\Diff\Chunk', $classes);
+        $this->assertNotContains('SebastianBergmann\Diff\Output\DiffOutputBuilderInterface', $classes);
     }
 
     public function testRecursiveInterfaceFind()
@@ -52,10 +52,10 @@ class ClassMapTest extends CIUnitTestCase
         $config->finder['PSR4'] = false;
         $config->finder['files'] = false;
 
-        $classes = (new ClassFinder($config))->getClassesInNamespace('PhpCsFixer\Diff', ClassFinder::RECURSIVE_MODE | ClassFinder::ALLOW_INTERFACES);
+        $classes = (new ClassFinder($config))->getClassesInNamespace('SebastianBergmann\Diff', ClassFinder::RECURSIVE_MODE | ClassFinder::ALLOW_INTERFACES);
 
-        $this->assertContains('PhpCsFixer\Diff\Output\DiffOutputBuilderInterface', $classes);
-        $this->assertNotContains('PhpCsFixer\Diff\Parser', $classes);
+        $this->assertContains('SebastianBergmann\Diff\Output\DiffOutputBuilderInterface', $classes);
+        $this->assertNotContains('SebastianBergmann\Diff\Parser', $classes);
     }
 
     public function testRecursiveFind()
@@ -64,10 +64,10 @@ class ClassMapTest extends CIUnitTestCase
         $config->finder['PSR4'] = false;
         $config->finder['files'] = false;
 
-        $classes = (new ClassFinder($config))->getClassesInNamespace('PhpCsFixer\Diff', ClassFinder::RECURSIVE_MODE);
+        $classes = (new ClassFinder($config))->getClassesInNamespace('SebastianBergmann\Diff', ClassFinder::RECURSIVE_MODE);
 
-        $this->assertNotContains('PhpCsFixer\Diff\Output\DiffOutputBuilderInterface', $classes);
-        $this->assertContains('PhpCsFixer\Diff\Parser', $classes);
+        $this->assertNotContains('SebastianBergmann\Diff\Output\DiffOutputBuilderInterface', $classes);
+        $this->assertContains('SebastianBergmann\Diff\Parser', $classes);
     }
 
     public function tearDown(): void

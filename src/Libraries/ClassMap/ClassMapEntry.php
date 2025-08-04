@@ -6,7 +6,9 @@ use Daycry\ClassFinder\ClassFinder;
 
 class ClassMapEntry
 {
-    /** @var string */
+    /**
+     * @var string
+     */
     private $className;
 
     /**
@@ -19,24 +21,27 @@ class ClassMapEntry
 
     /**
      * @param string $namespace
+     *
      * @return bool
      */
     public function knowsNamespace($namespace)
     {
-        return strpos($this->className, $namespace) !== false;
+        return str_contains($this->className, $namespace);
     }
 
     /**
      * @param string $namespace
+     * @param mixed  $options
+     *
      * @return bool
      */
     public function matches($namespace, $options)
     {
         if ($options & ClassFinder::RECURSIVE_MODE) {
             return $this->doesMatchAnyNamespace($namespace);
-        } else {
-            return $this->doesMatchDirectNamespace($namespace);
         }
+
+        return $this->doesMatchDirectNamespace($namespace);
     }
 
     /**
@@ -50,18 +55,18 @@ class ClassMapEntry
     /**
      * Checks if the class is a child or subchild of the given namespace.
      *
-     * @param $namespace
      * @return bool
      */
     private function doesMatchAnyNamespace($namespace)
     {
-        return strpos($this->getClassName(), $namespace) === 0;
+        return str_starts_with($this->getClassName(), $namespace);
     }
 
     /**
      * Checks if the class is a DIRECT child of the given namespace.
      *
      * @param string $namespace
+     *
      * @return bool
      */
     private function doesMatchDirectNamespace($namespace)

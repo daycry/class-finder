@@ -2,30 +2,34 @@
 
 namespace Daycry\ClassFinder\Libraries\ClassMap;
 
-use Daycry\ClassFinder\Exceptions\ClassFinderException;
 use Daycry\ClassFinder\Libraries\BaseFactory;
 
 class ClassMapFactory extends BaseFactory
 {
-    /**
-     * @return string[]
-     */
-    public function getClassMapEntries()
-    {
-        $classmap = $this->getClassMap();
-        $classmap = \array_merge($classmap, $this->loadAutoloadConfigClassMap());
+    private ?array $classmapEntriesCache = null;
 
-        // if classmap has no entries return empty array
-        if (count($classmap) == 0) {
-            // @codeCoverageIgnoreStart
-            return array();
-            // @codeCoverageIgnoreEnd
+    /**
+     * @return list<ClassMapEntry>
+     */
+    public function getClassMapEntries(): array
+    {
+        if ($this->classmapEntriesCache !== null) {
+            return $this->classmapEntriesCache;
         }
 
-        $classmapKeys = array_keys($classmap);
+        $classmap = array_merge($this->getClassMap(), $this->loadAutoloadConfigClassMap());
 
-        return array_map(function ($index) use ($classmapKeys) {
-            return new ClassMapEntry($classmapKeys[$index]);
-        }, range(0, count($classmap) - 1));
+        // if classmap has no entries return empty array
+        if (empty($classmap)) {
+            return $this->classmapEntriesCache = [];
+        }
+
+        $classmapEntries = [];
+
+        foreach (array_keys($classmap) as $className) {
+            $classmapEntries[] = new ClassMapEntry($className);
+        }
+
+        return $this->classmapEntriesCache = $classmapEntries;
     }
 }

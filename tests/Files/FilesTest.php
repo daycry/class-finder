@@ -43,8 +43,8 @@ EOL
     /**
      * @param $namespace
      * @param $expected
-     * @dataProvider getClassesDataProvider
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('getClassesDataProvider')]
     public function testGetClasses($namespace, $expected)
     {
         $metaData = stream_get_meta_data($this->file);
@@ -58,7 +58,7 @@ EOL
         $this->assertEquals($expected, $classes, 'FilesEntry should be able to determine the classes defined in a given file.');
     }
 
-    public function getClassesDataProvider()
+    public static function getClassesDataProvider()
     {
         return array(
             array(
@@ -84,8 +84,8 @@ EOL
     /**
      * @param $namespace
      * @param $expected
-     * @dataProvider knowsNamespaceDataProvider
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('knowsNamespaceDataProvider')]
     public function testKnowsNamespace($namespace, $expected)
     {
         $metaData = stream_get_meta_data($this->file);
@@ -98,7 +98,7 @@ EOL
         $this->assertEquals($expected, $classes, 'FilesEntry should be able to determine the classes defined in a given file.');
     }
 
-    public function knowsNamespaceDataProvider()
+    public static function knowsNamespaceDataProvider()
     {
         return array(
             array(

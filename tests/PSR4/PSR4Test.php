@@ -79,7 +79,7 @@ EOL;
                 'MyPSR4Root\\Foot\\',
                 array($this->root->getChild('Baz')->path())
             ))
-            ->setMethods(array(
+            ->onlyMethods(array(
                 'normalizePath'
             ))
             ->getMock();

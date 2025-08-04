@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/11.0/phpunit.xsd"
+    bootstrap="vendor/codeigniter4/framework/system/Test/bootstrap.php"
+    backupGlobals="false"
+    beStrictAboutOutputDuringTests="true"
+    colors="true"
+	stopOnFailure="false"
+	stopOnError="false"
+	stopOnWarning="false"
+	stopOnRisky="false"
+	stopOnIncomplete="false"
+	stopOnSkipped="false"
+	failOnWarning="true"
+	failOnRisky="true"
+    cacheDirectory="build/.phpunit.cache">
+	<coverage
+		includeUncoveredFiles="true"
+		pathCoverage="false"
+		ignoreDeprecatedCodeUnits="true"
+		disableCodeCoverageIgnore="true">
+		<report>
+			<clover outputFile="build/logs/clover.xml"/>
+			<html outputDirectory="build/coverage/html" highLowerBound="80"/>
+			<text outputFile="build/coverage/coverage.txt"/>
+		</report>
+	</coverage>
+	<testsuites>
+        <testsuite name="CronJob">
+            <directory suffix="Test.php">./tests</directory>
+        </testsuite>
+    </testsuites>
+	<logging>
+		<testdoxHtml outputFile="build/logs/testdox.html"/>
+		<testdoxText outputFile="build/logs/testdox.txt"/>
+		<junit outputFile="build/logs/logfile.xml"/>
+	</logging>
+	<source>
+		<include>
+			<directory suffix=".php">./src</directory>
+		</include>
+	</source>
+    <php>
+        <server name="app.baseURL" value="http://localhost/"/>
+        <!-- Directory containing phpunit.xml -->
+        <const name="HOMEPATH" value="./"/>
+        <!-- Directory containing the Paths config file -->
+        <const name="CONFIGPATH" value="./vendor/codeigniter4/framework/app/Config/"/>
+        <!-- Directory containing the front controller (index.php) -->
+        <const name="PUBLICPATH" value="./vendor/codeigniter4/framework/public/"/>
+    </php>
+</phpunit>

@@ -2,8 +2,8 @@
 
 namespace Daycry\ClassFinder\Libraries\ClassMap;
 
-use Daycry\ClassFinder\Interfaces\FinderInterface;
 use Daycry\ClassFinder\ClassFinder;
+use Daycry\ClassFinder\Interfaces\FinderInterface;
 
 class ClassMapFinder implements FinderInterface
 {
@@ -14,17 +14,20 @@ class ClassMapFinder implements FinderInterface
         $this->factory = new ClassMapFactory();
     }
 
+    public function getPriority(): int
+    {
+        return 2; // Medium priority for ClassMap
+    }
+
     /**
-     * @param string $namespace
-     * @param int $options
-     * @return string[]
+     * @return list<string>
      */
-    public function findClasses($namespace, $options)
+    public function findClasses(string $namespace, int $options): array
     {
         $classmapEntries = $this->factory->getClassmapEntries();
 
-        $matchingEntries = array_filter($classmapEntries, function (ClassmapEntry $entry) use ($namespace, $options) {
-            if (!$entry->matches($namespace, $options)) {
+        $matchingEntries = array_filter($classmapEntries, static function (ClassmapEntry $entry) use ($namespace, $options) {
+            if (! $entry->matches($namespace, $options)) {
                 return false;
             }
 
@@ -33,21 +36,22 @@ class ClassMapFinder implements FinderInterface
                 // For some reason calling class_exists() on a namespace'd function raises a Fatal Error (tested PHP 7.0.8)
                 // Example: DeepCopy\deep_copy
                 return $options & ClassFinder::ALLOW_FUNCTIONS;
-            } elseif (class_exists($potentialClass)) {
+            }
+            if (class_exists($potentialClass)) {
                 return $options & ClassFinder::ALLOW_CLASSES;
-            } elseif (interface_exists($potentialClass, false)) {
+            }
+            if (interface_exists($potentialClass, false)) {
                 return $options & ClassFinder::ALLOW_INTERFACES;
-            } elseif (trait_exists($potentialClass, false)) {
+            }
+            if (trait_exists($potentialClass, false)) {
                 return $options & ClassFinder::ALLOW_TRAITS;
             }
         });
 
-        return array_map(function (ClassmapEntry $entry) {
-            return $entry->getClassName();
-        }, $matchingEntries);
+        return array_map(static fn (ClassmapEntry $entry) => $entry->getClassName(), $matchingEntries);
     }
 
-    public function isNamespaceKnown($namespace)
+    public function isNamespaceKnown(string $namespace): bool
     {
         $classmapEntries = $this->factory->getClassmapEntries();
 
@@ -57,8 +61,6 @@ class ClassMapFinder implements FinderInterface
             }
         }
 
-        // @codeCoverageIgnoreStart
         return false;
-        // @codeCoverageIgnoreEnd
     }
 }
